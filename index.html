@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Consulting Space</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <div class="geometric-background">
+        <div class="shape circle"></div>
+        <div class="shape square"></div>
+        <div class="shape triangle"></div>
+    </div>
+
+    <div id="page-1" class="page active">
+        <div class="container text-center">
+            <h1 class="welcome-text animated-float">
+                ยินดีต้อนรับ สำหรับท่านที่มีปัญหากวนใจที่อยากจะปรึกษาหรือระบาย ทางเรายินดีเสมอ
+            </h1>
+            <button id="btn-to-page-2" class="pulse-btn">เริ่มต้นใช้งาน</button>
+        </div>
+    </div>
+
+    <div id="page-2" class="page">
+        <div class="container text-center">
+            <h2 class="title-text">วันนี้คุณจะเป็นอะไร?</h2>
+            <div class="role-selection">
+                <button id="btn-role-seeker" class="role-btn">คนต้องการปรึกษา</button>
+                <button id="btn-role-giver" class="role-btn">ผมให้คำปรึกษา</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-loading" class="page">
+        <div class="container text-center">
+            <h2 id="loading-message" class="main-message">กำลังเข้าสู่ระบบ...</h2>
+            <div class="matching-status">
+                <span>กำลังจับคู่ให้ รอสักครู่</span>
+                <div class="loading-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-chat" class="page">
+        <div class="container chat-container">
+            <div class="chat-header">
+                <span id="chat-with-role">ห้องสนทนานิรนาม</span>
+                <button id="btn-leave" class="leave-btn">ออกจากห้อง</button>
+            </div>
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="input-msg" placeholder="พิมพ์ข้อความของคุณที่นี่..." autocomplete="off">
+                <button id="btn-send">ส่ง</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
