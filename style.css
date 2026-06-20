@@ -1,555 +1,215 @@
+/* ==========================================================================
+   1. ตั้งค่าพื้นฐานและการจัดวาง
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Sarabun', sans-serif;
 }
 
 body {
-    background-color: #ffffff;
-    overflow: hidden;
-    width: 100vw;
-    height: 100vh;
-}
-
-/* ซ่อนทุกหน้าไว้ก่อน */
-.page {
-    display: none; 
-    width: 100vw;
-    height: 100vh;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
-}
-
-/* แสดงเฉพาะหน้าที่มีคลาส active */
-.page.active {
+    background-color: #ffffff; /* พื้นหลังสีขาวสะอาดตา */
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
 }
 
-.container {
-    max-width: 650px;
-    width: 90%;
-    padding: 30px;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 20px;
-    backdrop-filter: blur(5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+/* ==========================================================================
+   2. ปุ่มควบคุมเสียงลอยตัว (Floating Audio Button)
+   ========================================================================== */
+.music-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 30px;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    color: #2d3748;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-.text-center {
-    text-align: center;
+.music-btn:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: scale(1.05);
 }
 
-/* ฉากหลังเรขาคณิตเบลอ */
-.geometric-background {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+.music-btn.playing {
+    background: rgba(199, 249, 204, 0.7); /* โทนสีเขียวมิ้นท์อ่อนตอนกำลังเล่นเพลง */
+    border-color: rgba(199, 249, 204, 0.9);
+}
+
+/* ==========================================================================
+   3. พื้นหลังรูปทรงเรขาคณิต (Static Blurred Shapes)
+   ========================================================================== */
+.bg-static-shapes {
+    position: fixed;
     top: 0;
     left: 0;
-    z-index: 1;
-    filter: blur(15px);
-    opacity: 0.5;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    overflow: hidden;
     pointer-events: none;
 }
 
 .shape {
     position: absolute;
+    filter: blur(70px); /* สั่งให้รูปทรงเบลอ ฟุ้ง ละมุน ดูสงบ */
+    opacity: 0.35;
 }
 
-.circle {
-    width: 160px;
-    height: 160px;
+/* รูปทรงทรงต่าง ๆ สลับสีสันและตำแหน่งตามภาพเรขาคณิตพาสเทล */
+.circle-1 {
+    width: 450px;
+    height: 450px;
+    background: #b5e2fa; /* สีฟ้าพาสเทล */
     border-radius: 50%;
-    top: 15%;
-    left: 10%;
-    background-color: #a29bfe;
+    top: -10%;
+    right: 5%;
 }
 
-.square {
-    width: 130px;
-    height: 130px;
-    top: 65%;
-    right: 12%;
-    transform: rotate(35deg);
-    background-color: #ff7675;
+.circle-2 {
+    width: 380px;
+    height: 380px;
+    background: #e2cfea; /* สีม่วงพาสเทล */
+    border-radius: 50%;
+    bottom: -5%;
+    left: 2%;
 }
 
-.triangle {
-    width: 0;
-    height: 0;
-    border-left: 90px solid transparent;
-    border-right: 90px solid transparent;
-    border-bottom: 150px solid #55efc4;
-    top: 35%;
-    right: 45%;
-}
-
-/* แอนิเมชั่นหน้าต้อนรับ */
-.welcome-text {
-    color: #2d3436;
-    font-size: 24px;
-    line-height: 1.6;
-    margin-bottom: 40px;
-    opacity: 0;
-}
-
-.animated-float {
-    animation: fadeIn 1.5s ease-out forwards, floatAndShake 4s ease-in-out infinite 1.5s;
-}
-
-.pulse-btn {
-    padding: 15px 40px;
-    font-size: 18px;
-    background-color: #0984e3;
-    color: white;
-    border: none;
+.square-1 {
+    width: 320px;
+    height: 320px;
+    background: #c7f9cc; /* สีเขียวมิ้นท์ */
     border-radius: 30px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3);
-    animation: slowPulse 2.5s infinite ease-in-out;
+    top: 25%;
+    left: 15%;
 }
 
-@keyframes fadeIn {
-    to { opacity: 1; }
+.triangle-1 {
+    width: 350px;
+    height: 350px;
+    background: #ffdac1; /* สีส้มโอลด์โรสอ่อนๆ */
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    bottom: 15%;
+    right: 12%;
 }
 
-@keyframes floatAndShake {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    25% { transform: translateY(-6px) rotate(-0.5deg); }
-    50% { transform: translateY(-12px) rotate(0.5deg); }
-    75% { transform: translateY(-6px) rotate(-0.5deg); }
-}
-
-@keyframes slowPulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(0.96); }
-}
-
-/* หน้าเลือกบทบาท */
-.title-text {
-    font-size: 28px;
-    color: #2d3436;
-    margin-bottom: 30px;
-}
-
-.role-selection {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-}
-
-.role-btn {
-    padding: 15px 30px;
-    font-size: 18px;
-    border: 2px solid #0984e3;
-    background: transparent;
-    color: #0984e3;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.3s;
-    font-weight: bold;
-}
-
-.role-btn:hover {
-    background-color: #0984e3;
-    color: white;
-    transform: translateY(-3px);
-}
-
-/* จุดโหลด 3 จุด */
-.main-message {
-    font-size: 24px;
-    color: #2d3436;
-    line-height: 1.5;
-    margin-bottom: 25px;
-}
-
-.matching-status {
-    font-size: 15px;
-    color: #636e72;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.loading-dots {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.dot {
-    width: 6px;
-    height: 6px;
-    background-color: #636e72;
-    border-radius: 50%;
-    animation: dotPulse 1.4s infinite ease-in-out both;
-}
-
-.dot:nth-child(1) { animation-delay: -0.32s; }
-.dot:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes dotPulse {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-    40% { transform: scale(1.4); opacity: 1; }
-}
-
-/* ห้องแชท */
-.chat-container {
-    max-width: 500px;
-    height: 80vh;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    overflow: hidden;
-}
-
-.chat-header {
-    background: #0984e3;
-    color: white;
-    padding: 15px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-}
-
-.leave-btn {
-    background: #ff7675;
-    border: none;
-    color: white;
-    padding: 5px 12px;
-    border-radius: 15px;
-    cursor: pointer;
-}
-
-.chat-messages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.msg {
-    max-width: 75%;
-    padding: 10px 15px;
-    border-radius: 15px;
-    font-size: 15px;
-}
-.msg.me { background: #0084ff; color: white; align-self: flex-end; }
-.msg.other { background: #e5e5ea; color: black; align-self: flex-start; }
-.msg.system { color: #999; font-size: 12px; align-self: center; }
-
-.chat-input-area {
-    display: flex;
-    padding: 15px;
-    background: #f1f2f6;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-    gap: 10px;
-}
-
-#input-msg {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    outline: none;
-}
-
-#btn-send {
-    background: #0984e3;
-    color: white;
-    border: none;
-    padding: 0 20px;
-    border-radius: 20px;
-    cursor: pointer;
-}* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background-color: #ffffff;
-    overflow: hidden;
-    width: 100vw;
-    height: 100vh;
-}
-
-/* ซ่อนทุกหน้าไว้ก่อน */
-.page {
-    display: none; 
-    width: 100vw;
-    height: 100vh;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2;
-}
-
-/* แสดงเฉพาะหน้าที่มีคลาส active */
-.page.active {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
+/* ==========================================================================
+   4. หน้าต่างและส่วนควบคุมผู้ใช้ (Glassmorphism UI)
+   ========================================================================== */
 .container {
-    max-width: 650px;
-    width: 90%;
-    padding: 30px;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 20px;
-    backdrop-filter: blur(5px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-}
-
-.text-center {
-    text-align: center;
-}
-
-/* ฉากหลังเรขาคณิตเบลอ */
-.geometric-background {
-    position: absolute;
     width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
     z-index: 1;
-    filter: blur(15px);
-    opacity: 0.5;
-    pointer-events: none;
 }
 
-.shape {
-    position: absolute;
+/* เทคนิคดีไซน์กล่องกระจกฝ้า */
+.header-box, .welcome-box {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
 }
 
-.circle {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    top: 15%;
-    left: 10%;
-    background-color: #a29bfe;
+.header-box {
+    padding: 25px 40px;
 }
 
-.square {
-    width: 130px;
-    height: 130px;
-    top: 65%;
-    right: 12%;
-    transform: rotate(35deg);
-    background-color: #ff7675;
+.header-box h1 {
+    color: #1a202c;
+    font-size: 2.2rem;
+    font-weight: 600;
 }
 
-.triangle {
-    width: 0;
-    height: 0;
-    border-left: 90px solid transparent;
-    border-right: 90px solid transparent;
-    border-bottom: 150px solid #55efc4;
-    top: 35%;
-    right: 45%;
-}
-
-/* แอนิเมชั่นหน้าต้อนรับ */
-.welcome-text {
-    color: #2d3436;
-    font-size: 24px;
-    line-height: 1.6;
-    margin-bottom: 40px;
-    opacity: 0;
-}
-
-.animated-float {
-    animation: fadeIn 1.5s ease-out forwards, floatAndShake 4s ease-in-out infinite 1.5s;
-}
-
-.pulse-btn {
-    padding: 15px 40px;
-    font-size: 18px;
-    background-color: #0984e3;
-    color: white;
-    border: none;
-    border-radius: 30px;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3);
-    animation: slowPulse 2.5s infinite ease-in-out;
-}
-
-@keyframes fadeIn {
-    to { opacity: 1; }
-}
-
-@keyframes floatAndShake {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    25% { transform: translateY(-6px) rotate(-0.5deg); }
-    50% { transform: translateY(-12px) rotate(0.5deg); }
-    75% { transform: translateY(-6px) rotate(-0.5deg); }
-}
-
-@keyframes slowPulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(0.96); }
-}
-
-/* หน้าเลือกบทบาท */
-.title-text {
-    font-size: 28px;
-    color: #2d3436;
-    margin-bottom: 30px;
-}
-
-.role-selection {
+.main-content {
     display: flex;
+    gap: 50px;
+    align-items: flex-start;
+}
+
+/* สไตล์ปุ่มกดด้านซ้าย */
+.sidebar {
+    display: flex;
+    flex-direction: column;
     gap: 20px;
-    justify-content: center;
+    width: 250px;
 }
 
-.role-btn {
-    padding: 15px 30px;
-    font-size: 18px;
-    border: 2px solid #0984e3;
-    background: transparent;
-    color: #0984e3;
+.nav-btn {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 12px;
+    padding: 16px 25px;
+    font-size: 1.1rem;
+    color: #2d3748;
     cursor: pointer;
-    transition: 0.3s;
-    font-weight: bold;
+    text-align: left;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
 }
 
-.role-btn:hover {
-    background-color: #0984e3;
-    color: white;
-    transform: translateY(-3px);
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-/* จุดโหลด 3 จุด */
-.main-message {
-    font-size: 24px;
-    color: #2d3436;
-    line-height: 1.5;
-    margin-bottom: 25px;
+/* ส่วนต้อนรับด้านขวา + แอนิเมชันลอยแบบนุ่มนวลเบาๆ ไม่กระตุกเครื่อง */
+.welcome-box {
+    padding: 50px;
+    flex-grow: 1;
+    min-height: 280px;
+    animation: floatingEffect 6s ease-in-out infinite;
 }
 
-.matching-status {
-    font-size: 15px;
-    color: #636e72;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+.welcome-box h2 {
+    color: #1a202c;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
 }
 
-.loading-dots {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+.welcome-box p {
+    color: #4a5568;
+    font-size: 1.2rem;
+    line-height: 1.9;
 }
 
-.dot {
-    width: 6px;
-    height: 6px;
-    background-color: #636e72;
-    border-radius: 50%;
-    animation: dotPulse 1.4s infinite ease-in-out both;
+@keyframes floatingEffect {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-7px); }
+    100% { transform: translateY(0px); }
 }
 
-.dot:nth-child(1) { animation-delay: -0.32s; }
-.dot:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes dotPulse {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-    40% { transform: scale(1.4); opacity: 1; }
-}
-
-/* ห้องแชท */
-.chat-container {
-    max-width: 500px;
-    height: 80vh;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    overflow: hidden;
-}
-
-.chat-header {
-    background: #0984e3;
-    color: white;
-    padding: 15px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-}
-
-.leave-btn {
-    background: #ff7675;
-    border: none;
-    color: white;
-    padding: 5px 12px;
-    border-radius: 15px;
-    cursor: pointer;
-}
-
-.chat-messages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.msg {
-    max-width: 75%;
-    padding: 10px 15px;
-    border-radius: 15px;
-    font-size: 15px;
-}
-.msg.me { background: #0084ff; color: white; align-self: flex-end; }
-.msg.other { background: #e5e5ea; color: black; align-self: flex-start; }
-.msg.system { color: #999; font-size: 12px; align-self: center; }
-
-.chat-input-area {
-    display: flex;
-    padding: 15px;
-    background: #f1f2f6;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-    gap: 10px;
-}
-
-#input-msg {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    outline: none;
-}
-
-#btn-send {
-    background: #0984e3;
-    color: white;
-    border: none;
-    padding: 0 20px;
-    border-radius: 20px;
-    cursor: pointer;
+/* ปรับหน้าตาให้ตรงตามหน้าจอสมาร์ตโฟน */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .sidebar {
+        width: 100%;
+    }
+    .nav-btn:hover {
+        transform: translateY(-2px);
+    }
 }
